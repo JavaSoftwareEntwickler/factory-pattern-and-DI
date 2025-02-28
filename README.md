@@ -2,12 +2,13 @@
 # Esempio di Pagamenti con Spring Boot - Dependency Injection e Factory Pattern
 
 ## Introduzione
-In questo esempio, implementiamo un sistema di **pagamenti** con diverse modalità (`Carta di Credito`, `PayPal`, `Bonifico Bancario`) utilizzando **Spring Boot**. Il focus è sull'uso di **Dependency Injection (DI)** e del **Factory Pattern** per separare le responsabilità e rendere il codice facilmente estensibile e manutenibile.
+In questo esempio, implementiamo un sistema di **pagamenti** con diverse modalità (`Carta di Credito`, `PayPal`, `Bonifico Bancario`) utilizzando **Spring Boot**. L'approccio si concentra sull'uso di **Dependency Injection (DI)** e del **Factory Pattern** per separare le responsabilità e rendere il codice facilmente estensibile e manutenibile. Inoltre, il progetto dimostra come il **polimorfismo** consenta di invocare il metodo `paga()` sui diversi tipi di pagamento, mantenendo il codice pulito e flessibile.
 
 ### Obiettivo
 - **Gestire diversi metodi di pagamento** in un'applicazione Spring Boot.
 - Utilizzare **Dependency Injection** per la gestione delle dipendenze.
 - Applicare il **Factory Pattern** per creare oggetti di pagamento in modo dinamico, riducendo il legame tra le classi.
+- Dimostrare l'utilizzo del **polimorfismo** per un comportamento dinamico delle modalità di pagamento.
 
 ---
 
@@ -25,7 +26,7 @@ In questo esempio, implementiamo un sistema di **pagamenti** con diverse modalit
            this.importo = importo;
        }
 
-       public abstract void paga();
+       public abstract void paga(); // Polimorfismo: il comportamento cambia in base alla classe concreta
    }
    ```
 
@@ -106,7 +107,7 @@ In questo esempio, implementiamo un sistema di **pagamenti** con diverse modalit
        @PostMapping("/{tipo}/{importo}")
        public String effettuaPagamento(@PathVariable String tipo, @PathVariable double importo) {
            Pagamento pagamento = pagamentoFactory.getPagamento(tipo, importo);
-           pagamento.paga();
+           pagamento.paga(); // Polimorfismo: il metodo paga() cambia comportamento a seconda dell'oggetto
            return "Pagamento di " + importo + "€ elaborato con successo via " + tipo;
        }
    }
@@ -122,7 +123,10 @@ In questo esempio, implementiamo un sistema di **pagamenti** con diverse modalit
 2. **Factory Pattern**:  
    La `PagamentoFactory` è responsabile della **creazione dei pagamenti** a seconda del tipo passato dal client. In pratica, la factory agisce come una "fabbrica" di oggetti, restituendo l'istanza corretta del pagamento (ad esempio, `CartaDiCredito`, `PayPal` o `BonificoBancario`).
 
-3. **Controllo tramite REST API**:  
+3. **Polimorfismo**:  
+   Il polimorfismo entra in gioco quando chiamiamo il metodo `paga()` su un oggetto di tipo `Pagamento`. Sebbene tutte le istanze siano di tipo `Pagamento`, il comportamento del metodo `paga()` cambia in base alla classe concreta (ad esempio, `CartaDiCredito`, `PayPal`, o `BonificoBancario`). Questo consente di eseguire il pagamento in modo dinamico, senza bisogno di conoscere il tipo specifico di pagamento.
+
+4. **Controllo tramite REST API**:  
    Il controller espone un'API REST per **eseguire i pagamenti**. Ogni volta che viene ricevuta una richiesta, la `PagamentoFactory` crea l'istanza di pagamento appropriata e invoca il metodo `paga()`.
 
 ---
@@ -130,6 +134,7 @@ In questo esempio, implementiamo un sistema di **pagamenti** con diverse modalit
 ## Vantaggi dell'Approccio
 - **Modularità**: La logica di pagamento è ben separata tra le classi `Pagamento` e le sue implementazioni concrete.
 - **Scalabilità**: Se dobbiamo aggiungere nuovi metodi di pagamento, basta aggiungere una nuova classe che estende `Pagamento` e registrarla come bean con `@Component`.
+- **Polimorfismo**: Il comportamento del metodo `paga()` cambia dinamicamente a seconda del tipo di pagamento, mantenendo il codice semplice e flessibile.
 - **Testabilità**: Grazie alla **Dependency Injection**, possiamo facilmente **mockare le dipendenze** in fase di testing, migliorando la testabilità del sistema.
 - **Manutenibilità**: Il codice è facile da mantenere, poiché le dipendenze sono gestite centralmente da Spring e possiamo estendere il sistema con nuove funzionalità senza modificare il codice esistente.
 
@@ -140,6 +145,7 @@ In questo esempio, abbiamo utilizzato:
 - **Spring Boot** per sfruttare le potenzialità di **Dependency Injection**.
 - Il **Factory Pattern** per separare la creazione degli oggetti dal codice di business.
 - **Rest API** per interagire con il sistema di pagamenti in modo dinamico e semplice.
+- **Polimorfismo** per adattare il comportamento del sistema in base al tipo di pagamento selezionato.
 
 Questo approccio permette di **aggiungere facilmente nuovi metodi di pagamento** e rende l'applicazione più **flessibile**, **modulare** e **testabile**. 🚀
 
@@ -169,4 +175,3 @@ Questo approccio permette di **aggiungere facilmente nuovi metodi di pagamento**
    ```bash
    curl -X POST http://localhost:8080/pagamenti/carta/100
    ```
-
